@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun Greeting(name: String) {
     Text(
-        text = "Rise and shine, $name",
+        text = "Rise and shine",
         style = MaterialTheme.typography.headlineMedium
     )
 }
@@ -45,27 +45,15 @@ fun WakeUpCard() {
 }
 
 @Composable
-fun OnTimeReportCard() {
-    CardSection(title = "On-time report for the week") {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            DayCircle("M", color = Green)
-            DayCircle("T", color = Green)
-            DayCircle("W", color = Green)
-            DayCircle("Th", color = Red)
-            DayCircle("F", color = Green)
-            DayCircle("Sa", color = Green)
-            DayCircle("Su", color = Yellow)
-        }
+fun StreakReportCard(streakCount: Int) {
+    CardSection(title = "Current streak") {
+        Text(
+            text = "You have been on time for $streakCount days in a row!",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
-
-val Green = Color(0xFF81C784)
-val Yellow = Color(0xFFFFF176)
-val Red = Color(0xFFFF6B6B)
 
 @Composable
 fun DayCircle(day: String, color: Color) {
@@ -101,10 +89,10 @@ fun WeeklyShakeCountCard() {
 }
 
 @Composable
-fun RingtoneCard() {
+fun RingtoneCard(songTitle: String, songArtist: String) {
     CardSection(title = "Ringtone for the week") {
-        Text(text = "Turn up the music", style = MaterialTheme.typography.titleMedium)
-        Text(text = "Chris Brown", style = MaterialTheme.typography.titleSmall)
+        Text(text = songTitle, style = MaterialTheme.typography.titleMedium)
+        Text(text = songArtist, style = MaterialTheme.typography.titleSmall)
     }
 }
 

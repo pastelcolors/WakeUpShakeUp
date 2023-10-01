@@ -1,11 +1,19 @@
 package com.example.wakeupshakeup
 
 import Greeting
-import OnTimeReportCard
 import RingtoneCard
+import StreakReportCard
 import WakeUpCard
 import WeeklyShakeCountCard
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.icu.util.Calendar
 import android.os.Bundle
+import android.provider.AlarmClock
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -14,18 +22,47 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ServiceCompat.startForeground
+import androidx.lifecycle.Observer
+import com.example.wakeupshakeup.services.ShakeService
 import com.example.wakeupshakeup.ui.theme.WakeUpShakeUpTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("ScheduleExactAlarm")
+    private fun scheduleShakeService() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+
+        // Set the alarm to start at 7:30 a.m.
+        val calendar: Calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, 17)
+            set(Calendar.MINUTE, 15)
+        }
+
+        // Check if the alarm time has already passed for today
+        if (calendar.timeInMillis < System.currentTimeMillis()) {
+            // If it has, add one day to the calendar to set the alarm for tomorrow
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
+        Log.d("MainActivity", "Alarm scheduled for: ${calendar.timeInMillis}")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,11 +71,20 @@ class MainActivity : ComponentActivity() {
                 AlarmScreen()
             }
         }
+
+        val shakeService: ShakeService = ShakeService()
+
+        scheduleShakeService()
     }
 }
 
+
+
 @Composable
 fun AlarmScreen() {
+    val songTitle by ShakeService().currentSongTitle.observeAsState("")
+    val songArtist by ShakeService().currentSongArtist.observeAsState("")
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -52,11 +98,11 @@ fun AlarmScreen() {
             Spacer(modifier = Modifier.height(24.dp))
             WakeUpCard()
             Spacer(modifier = Modifier.height(24.dp))
-            OnTimeReportCard()
+            StreakReportCard(5)
             Spacer(modifier = Modifier.height(24.dp))
             WeeklyShakeCountCard()
             Spacer(modifier = Modifier.height(24.dp))
-            RingtoneCard()
+            RingtoneCard(songTitle, songArtist)
         }
     }
 }

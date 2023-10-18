@@ -2,6 +2,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.example.wakeupshakeup.ShowTimePicker
+
 
 @Composable
 fun Greeting(name: String) {
@@ -27,22 +33,35 @@ fun Greeting(name: String) {
         style = MaterialTheme.typography.headlineMedium
     )
 }
-
 @Composable
 fun WakeUpCard() {
+    var isEditing by remember { mutableStateOf(false) }
+    var timeText by remember { mutableStateOf("8:45 AM") } // Initial time
+    val time = remember { mutableStateOf("8:45 AM") }
+
     CardSection(
         title = "Daily wake up time",
-        actionText = "Edit",
-        actionOnClick = { /* Handle Edit click */ }
+        actionText = if (isEditing) "Save" else "Edit",
+        actionOnClick = {
+            isEditing = !isEditing
+        }
     ) {
-        // This is the main content for the card
-        Text(
-            text = "8:45 AM",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
-        )
+        if (isEditing) {
+            // Display the time picker when in edit mode
+            ShowTimePicker(LocalContext.current, time)
+
+
+        } else {
+            // Display the selected time when not in edit mode
+            Text(
+                text = "${time.value}",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
+
 
 @Composable
 fun StreakReportCard(streakCount: Int) {

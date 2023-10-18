@@ -35,13 +35,12 @@ fun Greeting(name: String) {
 }
 @Composable
 fun WakeUpCard() {
-    var isEditing by remember { mutableStateOf(false) }
-    var timeText by remember { mutableStateOf("8:45 AM") } // Initial time
     val time = remember { mutableStateOf("8:45 AM") }
+    var isEditing by remember { mutableStateOf(false) }
 
     CardSection(
         title = "Daily wake up time",
-        actionText = if (isEditing) "Save" else "Edit",
+        actionText = "Edit",
         actionOnClick = {
             isEditing = !isEditing
         }
@@ -49,7 +48,7 @@ fun WakeUpCard() {
         if (isEditing) {
             // Display the time picker when in edit mode
             ShowTimePicker(LocalContext.current, time)
-
+            isEditing = false // Exit edit mode automatically
 
         } else {
             // Display the selected time when not in edit mode
@@ -61,6 +60,8 @@ fun WakeUpCard() {
         }
     }
 }
+
+
 
 
 @Composable

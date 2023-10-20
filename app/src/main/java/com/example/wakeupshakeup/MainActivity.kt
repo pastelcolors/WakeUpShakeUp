@@ -102,13 +102,21 @@ fun ShowTimePicker(context: Context, time: MutableState<String>) {
 
             } else {
                 val period = "AM"
-                time.value = "$hourOfDay:${String.format("%02d", minute)} $period"
+                if (hourOfDay == 0) {
+                    formattedHour = 12
+                    time.value = "$formattedHour:${String.format("%02d", minute)} $period"
+                }
+                else {
+                    time.value = "$hourOfDay:${String.format("%02d", minute)} $period"
+                }
             }
 
         }, hour, minute, false
     )
     timePickerDialog.show()
 }
+
+
 @Composable
 fun AlarmScreen() {
     val songTitle by ShakeService().currentSongTitle.observeAsState("")

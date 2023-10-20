@@ -1,3 +1,4 @@
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -5,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,8 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import com.example.wakeupshakeup.ShowTimePicker
+import com.example.wakeupshakeup.R
 
 
 @Composable
@@ -53,7 +58,7 @@ fun WakeUpCard() {
         } else {
             // Display the selected time when not in edit mode
             Text(
-                text = "${time.value}",
+                text = time.value,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -121,10 +126,12 @@ fun CardSection(
     title: String,
     actionText: String? = null,
     actionOnClick: (() -> Unit)? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
+
 ) {
     ElevatedCard(
         shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.background(color = Color.Transparent) // Make the card background transparent
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -150,3 +157,4 @@ fun CardSection(
         }
     }
 }
+

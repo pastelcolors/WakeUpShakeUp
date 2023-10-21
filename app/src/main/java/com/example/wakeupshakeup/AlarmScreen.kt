@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,13 +32,15 @@ import androidx.compose.ui.unit.sp
 import com.example.wakeupshakeup.ShowTimePicker
 import com.example.wakeupshakeup.AlarmHelper
 import com.example.wakeupshakeup.R
-import java.time.format.TextStyle
+import com.example.wakeupshakeup.ui.Poppins
+
 
 @Composable
 fun Greeting(name: String) {
     Text(
         text = "Rise and shine!",
-        style = MaterialTheme.typography.headlineLarge,
+        fontFamily = Poppins,
+        style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 16.dp),
         color = Color.White
@@ -66,8 +69,8 @@ fun WakeUpCard() {
             // Display the selected time when not in edit mode
             Text(
                 text = time.value,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
+                fontFamily = Poppins,
+                style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
         }
@@ -79,8 +82,8 @@ fun StreakReportCard(streakCount: Int) {
     CardSection(title = "Current streak") {
         Text(
             text = "You have been on time for $streakCount days in a row!",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            fontFamily = Poppins,
+            style = MaterialTheme.typography.headlineSmall,
             color = Color.White
         )
     }
@@ -95,8 +98,8 @@ fun WeeklyShakeCountCard() {
         ) {
             Text(
                 text = "10",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
+                fontFamily = Poppins,
+                style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
         }
@@ -116,16 +119,21 @@ fun RingtoneCard(songTitle: String, songArtist: String) {
                 painter = painterResource(id = R.drawable.i_gotta_feeling), // Replace with your image resource
                 contentDescription = null, // Provide a content description
                 contentScale = ContentScale.Crop, // Adjust the content scale as needed
-                modifier = Modifier.width(100.dp) // Adjust the width of the image
+                modifier = Modifier.width(80.dp) // Adjust the width of the image
             )
             Spacer(modifier = Modifier.width(16.dp)) // Add spacing between the image and text
             Column {
                 Text(
                     text = songTitle,
-                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = Poppins,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color.White,
                 )
-                Text(text = songArtist, style = MaterialTheme.typography.titleSmall, color = Color.White)
+                Text(
+                    text = songArtist,
+                    fontFamily = Poppins,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White)
             }
         }
     }
@@ -163,7 +171,11 @@ fun CardSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium, color = Color.White)
+                    Text(
+                        text = title,
+                        fontFamily = Poppins,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White)
                     Spacer(Modifier.weight(1f))
                     actionText?.let {
                         TextButton(
@@ -175,6 +187,7 @@ fun CardSection(
                                 .align(Alignment.CenterVertically),
                         ) {
                             Text(
+                                fontFamily = Poppins,
                                 modifier = Modifier.drawBehind {
                                     val strokeWidthPx = 1.dp.toPx()
                                     val verticalOffset = size.height - 2.sp.toPx()
@@ -186,6 +199,7 @@ fun CardSection(
                                     )
                                 },
                                 text = it,
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }

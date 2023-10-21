@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,12 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import com.example.wakeupshakeup.ShowTimePicker
 import com.example.wakeupshakeup.AlarmHelper
 import com.example.wakeupshakeup.R
+import java.time.format.TextStyle
 
 @Composable
 fun Greeting(name: String) {
@@ -32,7 +39,8 @@ fun Greeting(name: String) {
         text = "Rise and shine!",
         style = MaterialTheme.typography.headlineLarge,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(top = 16.dp)
+        modifier = Modifier.padding(top = 16.dp),
+        color = Color.White
     )
 }
 @Composable
@@ -59,7 +67,8 @@ fun WakeUpCard() {
             Text(
                 text = time.value,
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
         }
     }
@@ -71,7 +80,8 @@ fun StreakReportCard(streakCount: Int) {
         Text(
             text = "You have been on time for $streakCount days in a row!",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
     }
 }
@@ -86,7 +96,8 @@ fun WeeklyShakeCountCard() {
             Text(
                 text = "10",
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
         }
     }
@@ -94,9 +105,29 @@ fun WeeklyShakeCountCard() {
 
 @Composable
 fun RingtoneCard(songTitle: String, songArtist: String) {
-    CardSection(title = "Ringtone for the week") {
-        Text(text = songTitle, style = MaterialTheme.typography.titleMedium)
-        Text(text = songArtist, style = MaterialTheme.typography.titleSmall)
+    CardSection(title = "Ringtone for the day") {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp), // Adjust the height as needed
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.i_gotta_feeling), // Replace with your image resource
+                contentDescription = null, // Provide a content description
+                contentScale = ContentScale.Crop, // Adjust the content scale as needed
+                modifier = Modifier.width(100.dp) // Adjust the width of the image
+            )
+            Spacer(modifier = Modifier.width(16.dp)) // Add spacing between the image and text
+            Column {
+                Text(
+                    text = songTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                )
+                Text(text = songArtist, style = MaterialTheme.typography.titleSmall, color = Color.White)
+            }
+        }
     }
 }
 
@@ -117,7 +148,7 @@ fun CardSection(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.solid_orange),
+                painter = painterResource(id = R.drawable.slate_800),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize()
@@ -132,14 +163,30 @@ fun CardSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                    Text(text = title, style = MaterialTheme.typography.titleMedium, color = Color.White)
                     Spacer(Modifier.weight(1f))
                     actionText?.let {
                         TextButton(
                             onClick = { actionOnClick?.invoke() },
-                            modifier = Modifier.align(Alignment.CenterVertically)
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.White,
+                                containerColor = Color.Transparent),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically),
                         ) {
-                            Text(it)
+                            Text(
+                                modifier = Modifier.drawBehind {
+                                    val strokeWidthPx = 1.dp.toPx()
+                                    val verticalOffset = size.height - 2.sp.toPx()
+                                    drawLine(
+                                        color = Color.White,
+                                        strokeWidth = strokeWidthPx,
+                                        start = Offset(0f, verticalOffset),
+                                        end = Offset(size.width, verticalOffset)
+                                    )
+                                },
+                                text = it,
+                            )
                         }
                     }
                 }

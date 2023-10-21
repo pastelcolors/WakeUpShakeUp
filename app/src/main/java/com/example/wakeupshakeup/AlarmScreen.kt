@@ -1,12 +1,9 @@
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,11 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import com.example.wakeupshakeup.ShowTimePicker
-import com.example.wakeupshakeup.R
+import com.example.wakeupshakeup.AlarmHelper
 
 
 @Composable
@@ -42,6 +37,7 @@ fun Greeting(name: String) {
 fun WakeUpCard() {
     val time = remember { mutableStateOf("8:45 AM") }
     var isEditing by remember { mutableStateOf(false) }
+    val alarmHelper = AlarmHelper(LocalContext.current)
 
     CardSection(
         title = "Daily wake up time",
@@ -52,7 +48,8 @@ fun WakeUpCard() {
     ) {
         if (isEditing) {
             // Display the time picker when in edit mode
-            ShowTimePicker(LocalContext.current, time)
+            val (selectedHour, selectedMinute) = ShowTimePicker(time)
+            alarmHelper.scheduleShakeService(selectedHour, selectedMinute)
             isEditing = false // Exit edit mode automatically
 
         } else {
@@ -65,8 +62,6 @@ fun WakeUpCard() {
         }
     }
 }
-
-
 
 
 @Composable

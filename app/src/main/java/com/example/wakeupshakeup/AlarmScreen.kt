@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
@@ -53,7 +54,8 @@ fun WakeUpCard() {
     val alarmHelper = AlarmHelper(LocalContext.current)
 
     CardSection(
-        title = "Daily wake up time",
+        title = " Daily wake up time",
+        icon = R.drawable.sun,
         actionText = "Edit",
         actionOnClick = {
             isEditing = !isEditing
@@ -79,7 +81,7 @@ fun WakeUpCard() {
 
 @Composable
 fun StreakReportCard(streakCount: Int) {
-    CardSection(title = "Current streak") {
+    CardSection(title = " Current streak", icon = R.drawable.streak) {
         Text(
             text = "You have been on time for $streakCount days in a row!",
             fontFamily = Poppins,
@@ -91,7 +93,7 @@ fun StreakReportCard(streakCount: Int) {
 
 @Composable
 fun WeeklyShakeCountCard() {
-    CardSection(title = "Weekly Shake Count") {
+    CardSection(title = " Weekly Shake Count", icon = R.drawable.shake) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -108,7 +110,7 @@ fun WeeklyShakeCountCard() {
 
 @Composable
 fun RingtoneCard(songTitle: String, songArtist: String) {
-    CardSection(title = "Ringtone for the day") {
+    CardSection(title = " Ringtone for the day", icon = R.drawable.music) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,6 +145,7 @@ fun RingtoneCard(songTitle: String, songArtist: String) {
 fun CardSection(
     title: String,
     actionText: String? = null,
+    icon: Int,
     actionOnClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -171,6 +174,11 @@ fun CardSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Image(
+                        painter = painterResource(icon),
+                        contentDescription = null, // Provide a content description
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
                     Text(
                         text = title,
                         fontFamily = Poppins,

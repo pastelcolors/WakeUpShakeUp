@@ -1,5 +1,7 @@
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,14 +19,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import com.example.wakeupshakeup.ShowTimePicker
 import com.example.wakeupshakeup.AlarmHelper
+import com.example.wakeupshakeup.R
 
 @Composable
 fun Greeting(name: String) {
     Text(
-        text = "Rise and shine",
+        text = "Rise and shine!",
         style = MaterialTheme.typography.headlineLarge,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 16.dp)
@@ -108,28 +113,39 @@ fun CardSection(
             .background(color = Color.Transparent)
             .padding(bottom = 8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
+        Box(
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier.padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Image(
+                painter = painterResource(id = R.drawable.solid_orange),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
             ) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.weight(1f))
-                actionText?.let {
-                    TextButton(
-                        onClick = { actionOnClick?.invoke() },
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ) {
-                        Text(it)
+                Row(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.weight(1f))
+                    actionText?.let {
+                        TextButton(
+                            onClick = { actionOnClick?.invoke() },
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Text(it)
+                        }
                     }
                 }
-            }
 
-            content()
+                content()
+            }
         }
     }
 }

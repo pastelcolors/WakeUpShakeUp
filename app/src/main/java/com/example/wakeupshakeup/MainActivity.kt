@@ -88,8 +88,8 @@ fun ShowTimePicker(time: MutableState<String>): Pair<Int, Int> {
 
 @Composable
 fun AlarmScreen() {
-    val songTitle by ShakeService().currentSongTitle.observeAsState("")
-    val songArtist by ShakeService().currentSongArtist.observeAsState("")
+    val songTitle by ShakeService().currentSongTitle.observeAsState("I Gotta Feeling")
+    val songArtist by ShakeService().currentSongArtist.observeAsState("Black Eyed Peas")
 
     Surface(
         modifier = Modifier.fillMaxSize(),

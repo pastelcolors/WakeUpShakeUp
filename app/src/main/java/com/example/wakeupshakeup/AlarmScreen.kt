@@ -121,7 +121,7 @@ fun RingtoneCard(songTitle: String, songArtist: String) {
                 painter = painterResource(id = R.drawable.i_gotta_feeling), // Replace with your image resource
                 contentDescription = null, // Provide a content description
                 contentScale = ContentScale.Crop, // Adjust the content scale as needed
-                modifier = Modifier.width(80.dp) // Adjust the width of the image
+                modifier = Modifier.size(80.dp, 80.dp) // Adjust the width of the image
             )
             Spacer(modifier = Modifier.width(16.dp)) // Add spacing between the image and text
             Column {

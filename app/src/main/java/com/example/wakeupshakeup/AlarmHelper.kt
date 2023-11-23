@@ -8,7 +8,6 @@ import android.content.Intent
 import android.icu.util.Calendar
 import android.util.Log
 
-
 class AlarmHelper(private val context: Context){
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleShakeService(selectedHour: Int, selectedMinute: Int) {
@@ -32,7 +31,7 @@ class AlarmHelper(private val context: Context){
             pendingIntent
         )
 
-        Log.d("MainActivity", "Alarm scheduled for: ${calendar.timeInMillis}")
+        Log.d("MainActivity", "Alarm scheduled for: ${calendar.time}")
     }
 }
 

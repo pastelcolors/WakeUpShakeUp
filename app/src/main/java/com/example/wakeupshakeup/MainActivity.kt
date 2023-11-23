@@ -4,13 +4,14 @@ import Greeting
 import RingtoneCard
 import StreakReportCard
 import WakeUpCard
-import WeeklyShakeCountCard
+import TotalShakeCountCard
 import android.app.TimePickerDialog
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,67 +31,44 @@ import androidx.compose.ui.unit.dp
 import com.example.wakeupshakeup.services.ShakeService
 import com.example.wakeupshakeup.ui.theme.WakeUpShakeUpTheme
 import com.example.wakeupshakeup.AlarmHelper
+import com.example.wakeupshakeup.database.DatabaseHandler
+import com.example.wakeupshakeup.viewmodel.AlarmViewModel
 
 class MainActivity : ComponentActivity() {
+    private val alarmViewModel: AlarmViewModel by viewModels()
+
+    private fun updateTotalShakeCountForTesting(newCount: Int) {
+        val sql = "UPDATE ${DatabaseHandler.TABLE_ALARM_INFO} SET ${DatabaseHandler.COLUMN_TOTAL_SHAKE_COUNT} = $newCount WHERE ${DatabaseHandler.COLUMN_ID} = 1"
+        alarmViewModel.alarmInfoDatabase.executeRawSql(sql)
+        // After updating the database, refresh the LiveData in the ViewModel
+        alarmViewModel.loadTotalShakeCount()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContent {
             WakeUpShakeUpTheme {
-                // A surface container using the 'background' color from the theme
-                AlarmScreen()
+                AlarmScreen(alarmViewModel)
             }
         }
+
+        updateTotalShakeCountForTesting(42) // Set totalShakeCount to 42 for testing
+        alarmViewModel.bindToShakeService()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        alarmViewModel.unbindFromShakeService()
     }
 }
 
 @Composable
-fun ShowTimePicker(time: MutableState<String>): Pair<Int, Int> {
-    val calendar = Calendar.getInstance()
-    val hour = calendar[Calendar.HOUR_OF_DAY]
-    val minute = calendar[Calendar.MINUTE]
-    var formattedHour = 0
-
-    val timePickerDialog = TimePickerDialog(
-        LocalContext.current, // Use LocalContext.current
-        { _, hourOfDay, minute ->
-            if (hourOfDay >= 12) {
-                if (hourOfDay > 12) {
-                    // If it's a PM time after 12:00, subtract 12 hours.
-                    formattedHour = hourOfDay - 12
-                } else {
-                    // If it's exactly 12:00 PM, keep it as is.
-                    hourOfDay
-                }
-                // Set the period (AM/PM) based on the hourOfDay
-                val period = "PM"
-
-                // Construct the time string
-                time.value = "$formattedHour:${String.format("%02d", minute)} $period"
-
-            } else {
-                val period = "AM"
-                if (hourOfDay == 0) {
-                    formattedHour = 12
-                    time.value = "$formattedHour:${String.format("%02d", minute)} $period"
-                } else {
-                    time.value = "$hourOfDay:${String.format("%02d", minute)} $period"
-                }
-            }
-        }, hour, minute, false
-    )
-    timePickerDialog.show()
-
-    // Return the selected hour and minute as a pair
-    return Pair(hour, minute)
-}
-
-
-
-
-@Composable
-fun AlarmScreen() {
-    val songTitle by ShakeService().currentSongTitle.observeAsState("I Gotta Feeling")
-    val songArtist by ShakeService().currentSongArtist.observeAsState("Black Eyed Peas")
+fun AlarmScreen(alarmViewModel: AlarmViewModel) {
+    val songTitle by alarmViewModel.songTitle.observeAsState("I Gotta Feeling")
+    val songArtist by alarmViewModel.songArtist.observeAsState("Black Eyed Peas")
+    val totalShakeCount by alarmViewModel.totalShakeCount.observeAsState(0)
+    val streakCount by alarmViewModel.streakCount.observeAsState(0)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -101,23 +79,15 @@ fun AlarmScreen() {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Greeting(name = "User")
+            Greeting()
             Spacer(modifier = Modifier.height(24.dp))
-            WakeUpCard()
+            WakeUpCard(alarmViewModel)
             Spacer(modifier = Modifier.height(24.dp))
-            StreakReportCard(5)
+            StreakReportCard(streakCount)
             Spacer(modifier = Modifier.height(24.dp))
-            WeeklyShakeCountCard()
+            TotalShakeCountCard(totalShakeCount)
             Spacer(modifier = Modifier.height(24.dp))
             RingtoneCard(songTitle, songArtist)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AlarmScreenPreview() {
-    WakeUpShakeUpTheme {
-        AlarmScreen()
     }
 }

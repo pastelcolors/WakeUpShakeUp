@@ -13,43 +13,41 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.icu.util.Calendar
 import android.media.MediaPlayer
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.example.wakeupshakeup.R
+import com.example.wakeupshakeup.database.AlarmInfoDatabase
+import com.example.wakeupshakeup.model.Song
 import kotlin.math.sqrt
 import kotlin.random.Random
-
-data class Song(
-    val title: String,
-    val artist: String,
-    val resource: Int
-)
-
-val alarmSounds = arrayOf(
-    Song("Rather Be", "Clean Bandit", R.raw.ratherbe), // Sunday
-    Song("Ready For It", "Taylor Swift", R.raw.readyforit), // Monday
-    Song("Shake It Off", "Taylor Swift", R.raw.shakeitoff), // Tuesday
-    Song("Turn Up", "Chris Brown", R.raw.turnup), // Wednesday
-    Song("Viva La Vida", "Coldplay", R.raw.vivalavida), // Thursday
-    Song("I Gotta Feeling", "Black Eyed Peas", R.raw.igottafeeling), // Friday
-    Song("We Found Love", "Rihanna", R.raw.wefoundlove) // Saturday
-)
+import com.example.wakeupshakeup.model.alarmSounds
 
 class ShakeService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var sensor: Sensor? = null
     private var shakeCount = 0
     private val requiredShakes = 10
-    private val NOTIFICATION_ID = 1 // Define NOTIFICATION_ID here
+    private val NOTIFICATION_ID = 1
+    private var todaySound: Song? = null
 
-    // Define the LiveData for the current song title
     val currentSongTitle = MutableLiveData<String>()
     val currentSongArtist = MutableLiveData<String>()
 
     private var mediaPlayer: MediaPlayer? = null
+
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder() {
+        fun getService(): ShakeService = this@ShakeService
+    }
+
+    override fun onBind(intent: Intent): IBinder {
+        return binder
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -60,13 +58,32 @@ class ShakeService : Service(), SensorEventListener {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         }
 
+        // val dayOfWeek = 6 // For testing purposes, set the day of the week to Saturday
         val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-        val todaySound = alarmSounds[dayOfWeek - 1] // Subtract 1 because Calendar.SUNDAY is 1
-        mediaPlayer = MediaPlayer.create(this, todaySound.resource)
-        mediaPlayer?.start()
+        todaySound = alarmSounds[dayOfWeek - 1] // Subtract 1 because Calendar.SUNDAY is 1
+
+        // Update the current song information
+        currentSongTitle.postValue(todaySound!!.title)
+        currentSongArtist.postValue(todaySound!!.artist)
 
         startForeground(NOTIFICATION_ID, createNotification())
         Log.d("ShakeService", "Service started and moved to foreground")
+    }
+    
+    private fun startAlarm() {
+        todaySound?.let { sound ->
+            mediaPlayer = MediaPlayer.create(this, sound.resource).apply {
+                isLooping = true // Set the MediaPlayer to loop the sound
+                start()
+            }
+        }
+    }    
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "com.example.wakeupshakeup.START_ALARM") {
+            startAlarm()
+        }
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -75,27 +92,28 @@ class ShakeService : Service(), SensorEventListener {
         sensorManager.unregisterListener(this)
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
             val x = event.values[0]
             val y = event.values[1]
             val z = event.values[2]
             val acceleration = sqrt(x * x + y * y + z * z) - SensorManager.GRAVITY_EARTH
-            Log.d("ShakeService", "Acceleration: $acceleration")
             if (acceleration > 30) {
                 Log.d("ShakeService", "Shake detected")
                 Log.d("ShakeService", "Shake acceleration: $acceleration")
                 shakeCount++
+                // Get instance of AlarmInfoDatabase
+                val alarmInfoDatabase = AlarmInfoDatabase(this)
+                // Increment the total shake count in the database
+                alarmInfoDatabase.incrementTotalShakeCount()
                 if (shakeCount >= requiredShakes) {
-                    mediaPlayer?.stop()
-                    // log
-                    Log.d("ShakeService", "Alarm stopped")
-            
+                    mediaPlayer?.apply {
+                        stop() // Stop the sound
+                        reset() // Reset the MediaPlayer to its uninitialized state
+                    }
+                    // Reset shakeCount for the next alarm
                     shakeCount = 0
+                    Log.d("ShakeService", "Alarm stopped")
                 }
             }
         }

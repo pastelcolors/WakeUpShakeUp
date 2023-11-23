@@ -6,7 +6,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.wakeupshakeup.R
 import com.example.wakeupshakeup.ui.theme.Typography
 
-
 val Poppins= FontFamily(
     Font(R.font.poppins_bold, FontWeight.Bold),
     Font(R.font.poppins_regular, FontWeight.Normal),

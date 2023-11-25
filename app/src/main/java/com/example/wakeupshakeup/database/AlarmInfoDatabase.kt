@@ -38,6 +38,13 @@ class AlarmInfoDatabase(context: Context) {
         db.update(DatabaseHandler.TABLE_ALARM_INFO, contentValues, "${DatabaseHandler.COLUMN_ID} = ?", arrayOf("1"))
     }
 
+    fun resetStreakCount() {
+        val db = databaseHandler.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseHandler.COLUMN_STREAK_COUNT, 0)
+        db.update(DatabaseHandler.TABLE_ALARM_INFO, contentValues, "${DatabaseHandler.COLUMN_ID} = ?", arrayOf("1"))
+    }
+
     fun getTotalShakeCount(): Int {
         val db = databaseHandler.readableDatabase
         val cursor = db.rawQuery("SELECT ${DatabaseHandler.COLUMN_TOTAL_SHAKE_COUNT} FROM ${DatabaseHandler.TABLE_ALARM_INFO} WHERE ${DatabaseHandler.COLUMN_ID} = 1", null)
@@ -80,7 +87,6 @@ class AlarmInfoDatabase(context: Context) {
         cursor.close()
         return count
     }
-    
 
     // For testing purposes
     fun executeRawSql(sql: String) {

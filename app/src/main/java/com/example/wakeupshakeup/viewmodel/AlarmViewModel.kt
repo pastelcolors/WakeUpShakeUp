@@ -95,9 +95,27 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application), 
             loadStreakCount()
         }
     }
-    
+
+    fun incrementStreakCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            alarmInfoDatabase.incrementStreakCount()
+            loadStreakCount() // Reload the streak count after incrementing
+        }
+    }
+
+    fun resetStreakCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            alarmInfoDatabase.resetStreakCount()
+            _streakCount.postValue(0) // Update the streak count LiveData to zero
+        }
+    }
+
     override fun onShakeCountChanged(count: Int) {
         _totalShakeCount.postValue(count)
+    }
+
+    override fun onStreakCountChanged(streakCount: Int) {
+        _streakCount.postValue(streakCount)
     }
 
     private val serviceConnection = object : ServiceConnection {

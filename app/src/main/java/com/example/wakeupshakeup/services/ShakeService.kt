@@ -28,17 +28,20 @@ import com.example.wakeupshakeup.model.alarmSounds
 
 interface ShakeListener {
     fun onShakeCountChanged(count: Int)
+    fun onStreakCountChanged(streakCount: Int)
 }
 
 class ShakeService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var sensor: Sensor? = null
     private var shakeCount = 0
-    private val requiredShakes = 10
+    val requiredShakes = 10
     private val NOTIFICATION_ID = 1
     private var todaySound: Song? = null
     private var lastShakeTimestamp: Long = 0
     var shakeListener: ShakeListener? = null
+    private var alarmStartTime: Long = 0
+    private val STREAK_RESET_TIME = 0.5 * 60 * 1000 // 0.5 minutes in milliseconds
 
     val currentSongTitle = MutableLiveData<String>()
     val currentSongArtist = MutableLiveData<String>()
@@ -82,6 +85,7 @@ class ShakeService : Service(), SensorEventListener {
                 isLooping = true // Set the MediaPlayer to loop the sound
                 start()
             }
+            alarmStartTime = System.currentTimeMillis() // Record the start time of the alarm
         }
     }    
 
@@ -140,24 +144,41 @@ class ShakeService : Service(), SensorEventListener {
         )
     }
 
+    fun notifyStreakCountChanged() {
+        val alarmInfoDatabase = AlarmInfoDatabase(this)
+        val newStreakCount = alarmInfoDatabase.getStreakCount()
+        shakeListener?.onStreakCountChanged(newStreakCount)
+    }
     
     private fun incrementShakeCount() {
+        val currentTime = System.currentTimeMillis()
         shakeCount++
         Log.d("ShakeService", "Shake count: $shakeCount")
         // Get an instance of AlarmInfoDatabase
         val alarmInfoDatabase = AlarmInfoDatabase(this)
         // Increment the total shake count in the database
         alarmInfoDatabase.incrementTotalShakeCount()
-
         // Get the updated shake count from the database
         val updatedShakeCount = alarmInfoDatabase.getTotalShakeCount()
         // Notify the ViewModel about the updated shake count
         shakeListener?.onShakeCountChanged(updatedShakeCount)
 
         if (shakeCount >= requiredShakes) {
+            if (currentTime - alarmStartTime <= STREAK_RESET_TIME) {
+                // The user completed the shaking activity within the 2-minute window
+                val alarmInfoDatabase = AlarmInfoDatabase(this)
+                alarmInfoDatabase.incrementStreakCount() // Increment the streak count
+                notifyStreakCountChanged() // Notify the ViewModel about the streak count change
+            } else {
+                // The user failed to complete the shaking activity within the 2-minute window
+                val alarmInfoDatabase = AlarmInfoDatabase(this)
+                alarmInfoDatabase.resetStreakCount() // Reset the streak count to zero
+                notifyStreakCountChanged() // Notify the ViewModel about the streak count change
+            }
             stopMediaPlayerAndResetShakeCount()
         }
     }
+    
     
     private fun stopMediaPlayerAndResetShakeCount() {
         mediaPlayer?.apply {

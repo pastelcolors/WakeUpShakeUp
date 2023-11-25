@@ -12,12 +12,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.example.wakeupshakeup.database.AlarmInfoDatabase
+import com.example.wakeupshakeup.services.ShakeListener
 import com.example.wakeupshakeup.services.ShakeService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AlarmViewModel(application: Application) : AndroidViewModel(application) {
+class AlarmViewModel(application: Application) : AndroidViewModel(application), ShakeListener {
     private val _songTitle = MutableLiveData<String>()
     val songTitle: LiveData<String> = _songTitle
 
@@ -94,6 +95,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             loadStreakCount()
         }
     }
+    
+    override fun onShakeCountChanged(count: Int) {
+        _totalShakeCount.postValue(count)
+    }
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -104,10 +109,13 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             // Observe the LiveData from the service and update the ViewModel's LiveData
             shakeService?.currentSongTitle?.observeForever(songTitleObserver)
             shakeService?.currentSongArtist?.observeForever(songArtistObserver)
+
+            shakeService?.shakeListener = this@AlarmViewModel
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
             isBound = false
+            shakeService?.shakeListener = null
         }
     }
 

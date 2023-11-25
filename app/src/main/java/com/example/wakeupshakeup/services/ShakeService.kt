@@ -26,6 +26,10 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 import com.example.wakeupshakeup.model.alarmSounds
 
+interface ShakeListener {
+    fun onShakeCountChanged(count: Int)
+}
+
 class ShakeService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var sensor: Sensor? = null
@@ -34,6 +38,7 @@ class ShakeService : Service(), SensorEventListener {
     private val NOTIFICATION_ID = 1
     private var todaySound: Song? = null
     private var lastShakeTimestamp: Long = 0
+    var shakeListener: ShakeListener? = null
 
     val currentSongTitle = MutableLiveData<String>()
     val currentSongArtist = MutableLiveData<String>()
@@ -100,7 +105,7 @@ class ShakeService : Service(), SensorEventListener {
                 if ((currentTime - lastShakeTimestamp) > 300) { // Debounce check
                     val acceleration = calculateAcceleration(it.values)
                     Log.d("ShakeService", "Acceleration: $acceleration")
-                    if (acceleration > 20) {
+                    if (acceleration > 15) {
                         Log.d("ShakeService", "Shake detected")
                         if (mediaPlayer?.isPlaying == true) {
                             incrementShakeCount()
@@ -143,6 +148,12 @@ class ShakeService : Service(), SensorEventListener {
         val alarmInfoDatabase = AlarmInfoDatabase(this)
         // Increment the total shake count in the database
         alarmInfoDatabase.incrementTotalShakeCount()
+
+        // Get the updated shake count from the database
+        val updatedShakeCount = alarmInfoDatabase.getTotalShakeCount()
+        // Notify the ViewModel about the updated shake count
+        shakeListener?.onShakeCountChanged(updatedShakeCount)
+
         if (shakeCount >= requiredShakes) {
             stopMediaPlayerAndResetShakeCount()
         }

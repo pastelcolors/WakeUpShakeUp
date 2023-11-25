@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity() {
                 AlarmScreen(alarmViewModel)
             }
         }
-
         // updateTotalShakeCountForTesting(42) // Set totalShakeCount to 42 for testing
         alarmViewModel.bindToShakeService()
     }

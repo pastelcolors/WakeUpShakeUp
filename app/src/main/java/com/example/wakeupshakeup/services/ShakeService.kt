@@ -33,6 +33,7 @@ class ShakeService : Service(), SensorEventListener {
     private val requiredShakes = 10
     private val NOTIFICATION_ID = 1
     private var todaySound: Song? = null
+    private var lastShakeTimestamp: Long = 0
 
     val currentSongTitle = MutableLiveData<String>()
     val currentSongArtist = MutableLiveData<String>()
@@ -93,31 +94,69 @@ class ShakeService : Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            val x = event.values[0]
-            val y = event.values[1]
-            val z = event.values[2]
-            val acceleration = sqrt(x * x + y * y + z * z) - SensorManager.GRAVITY_EARTH
-            if (acceleration > 30) {
-                Log.d("ShakeService", "Shake detected")
-                Log.d("ShakeService", "Shake acceleration: $acceleration")
-                shakeCount++
-                // Get instance of AlarmInfoDatabase
-                val alarmInfoDatabase = AlarmInfoDatabase(this)
-                // Increment the total shake count in the database
-                alarmInfoDatabase.incrementTotalShakeCount()
-                if (shakeCount >= requiredShakes) {
-                    mediaPlayer?.apply {
-                        stop() // Stop the sound
-                        reset() // Reset the MediaPlayer to its uninitialized state
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                val currentTime = System.currentTimeMillis()
+                if ((currentTime - lastShakeTimestamp) > 300) { // Debounce check
+                    val acceleration = calculateAcceleration(it.values)
+                    Log.d("ShakeService", "Acceleration: $acceleration")
+                    if (acceleration > 20) {
+                        Log.d("ShakeService", "Shake detected")
+                        if (mediaPlayer?.isPlaying == true) {
+                            incrementShakeCount()
+                        }
+                        lastShakeTimestamp = currentTime // Update last shake timestamp
                     }
-                    // Reset shakeCount for the next alarm
-                    shakeCount = 0
-                    Log.d("ShakeService", "Alarm stopped")
                 }
             }
         }
     }
+    
+    private val alpha = 0.8f
+    private var gravity = FloatArray(3)
+
+    private fun calculateAcceleration(values: FloatArray): Float {
+        // Apply low-pass filter
+        gravity[0] = alpha * gravity[0] + (1 - alpha) * values[0]
+        gravity[1] = alpha * gravity[1] + (1 - alpha) * values[1]
+        gravity[2] = alpha * gravity[2] + (1 - alpha) * values[2]
+
+        // Remove gravity contribution with the high-pass filter
+        val linearAcceleration = FloatArray(3)
+        linearAcceleration[0] = values[0] - gravity[0]
+        linearAcceleration[1] = values[1] - gravity[1]
+        linearAcceleration[2] = values[2] - gravity[2]
+
+        // Calculate the magnitude of the acceleration vector
+        return sqrt(
+            linearAcceleration[0] * linearAcceleration[0] +
+            linearAcceleration[1] * linearAcceleration[1] +
+            linearAcceleration[2] * linearAcceleration[2]
+        )
+    }
+
+    
+    private fun incrementShakeCount() {
+        shakeCount++
+        Log.d("ShakeService", "Shake count: $shakeCount")
+        // Get an instance of AlarmInfoDatabase
+        val alarmInfoDatabase = AlarmInfoDatabase(this)
+        // Increment the total shake count in the database
+        alarmInfoDatabase.incrementTotalShakeCount()
+        if (shakeCount >= requiredShakes) {
+            stopMediaPlayerAndResetShakeCount()
+        }
+    }
+    
+    private fun stopMediaPlayerAndResetShakeCount() {
+        mediaPlayer?.apply {
+            stop() // Stop the sound
+            reset() // Reset the MediaPlayer to its uninitialized state
+        }
+        // Reset shakeCount for the next alarm
+        shakeCount = 0
+        Log.d("ShakeService", "Alarm stopped")
+    }    
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // 

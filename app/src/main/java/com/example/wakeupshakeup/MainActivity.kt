@@ -1,6 +1,7 @@
 package com.example.wakeupshakeup
 
 import Greeting
+import ResetButton
 import RingtoneCard
 import StreakReportCard
 import WakeUpCard
@@ -13,8 +14,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -53,7 +57,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        updateTotalShakeCountForTesting(42) // Set totalShakeCount to 42 for testing
+        // updateTotalShakeCountForTesting(42) // Set totalShakeCount to 42 for testing
         alarmViewModel.bindToShakeService()
     }
 
@@ -79,7 +83,14 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Greeting()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Greeting()
+                Spacer(modifier = Modifier.weight(1f))
+                ResetButton(alarmViewModel)
+            }
             Spacer(modifier = Modifier.height(24.dp))
             WakeUpCard(alarmViewModel)
             Spacer(modifier = Modifier.height(24.dp))
@@ -88,6 +99,8 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
             TotalShakeCountCard(totalShakeCount)
             Spacer(modifier = Modifier.height(24.dp))
             RingtoneCard(songTitle, songArtist)
+            Spacer(modifier = Modifier.height(24.dp))
+            ResetButton(alarmViewModel)
         }
     }
 }

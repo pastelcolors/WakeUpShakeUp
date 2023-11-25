@@ -298,3 +298,17 @@ fun CardSection(
     }
 }
 
+@Composable
+fun ResetButton(alarmViewModel: AlarmViewModel) {
+    TextButton(
+        onClick = {
+            alarmViewModel.resetShakeAndStreakCountsToDefaults()
+        },
+        modifier = Modifier.padding(12.dp)
+    ) {
+        Text(
+            text = "Reset to Defaults",
+            color = Color.White,
+        )
+    }
+}

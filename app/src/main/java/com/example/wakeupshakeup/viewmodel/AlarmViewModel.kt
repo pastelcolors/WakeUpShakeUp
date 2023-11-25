@@ -86,6 +86,15 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun resetShakeAndStreakCountsToDefaults() {
+        viewModelScope.launch(Dispatchers.IO) {
+            alarmInfoDatabase.resetShakeAndStreakCount()
+            // After resetting, load the updated counts
+            loadTotalShakeCount()
+            loadStreakCount()
+        }
+    }
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as ShakeService.LocalBinder

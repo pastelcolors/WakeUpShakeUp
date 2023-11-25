@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -73,6 +75,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
     val songArtist by alarmViewModel.songArtist.observeAsState("Black Eyed Peas")
     val totalShakeCount by alarmViewModel.totalShakeCount.observeAsState(0)
     val streakCount by alarmViewModel.streakCount.observeAsState(0)
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -82,6 +85,7 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .verticalScroll(scrollState),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -99,8 +103,6 @@ fun AlarmScreen(alarmViewModel: AlarmViewModel) {
             TotalShakeCountCard(totalShakeCount)
             Spacer(modifier = Modifier.height(24.dp))
             RingtoneCard(songTitle, songArtist)
-            Spacer(modifier = Modifier.height(24.dp))
-            ResetButton(alarmViewModel)
         }
     }
 }

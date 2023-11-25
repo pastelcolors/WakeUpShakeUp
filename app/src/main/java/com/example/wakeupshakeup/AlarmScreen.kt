@@ -164,7 +164,7 @@ fun StreakReportCard(streakCount: Int) {
         Text(
             text = "You have been on time for $streakCount days in a row!",
             fontFamily = Poppins,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.White
         )
     }
@@ -193,7 +193,7 @@ fun RingtoneCard(songTitle: String, songArtist: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(100.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -307,7 +307,7 @@ fun ResetButton(alarmViewModel: AlarmViewModel) {
         modifier = Modifier.padding(12.dp)
     ) {
         Text(
-            text = "Reset to Defaults",
+            text = "Reset",
             color = Color.White,
         )
     }
